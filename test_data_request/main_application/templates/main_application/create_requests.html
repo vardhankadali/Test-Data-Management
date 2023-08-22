@@ -1,0 +1,25 @@
+{% extends 'main_application/base.html' %}
+{% load static %}
+
+{% block page_title %}Raise Request{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Raise Request</h3>
+                    </div>
+                    {% include "main_application/form_template.html" with messages=messages  form=form button_text="Raise Request"%}
+                </div>
+                <!-- /.card -->
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

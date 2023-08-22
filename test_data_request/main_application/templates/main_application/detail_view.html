@@ -1,0 +1,65 @@
+{% extends 'main_application/base.html' %}
+{% load static %}
+{% block page_title %}View Requests{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">View Requests</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>AssignedTo</th>
+                                    <th>RequestedBy</th>
+                                    <th>Synopsis</th>
+                                    <th>Status</th>
+                                    <th>Stakeholders</th>
+                                    <th>Env/Swimlane</th>
+                                    <th>Application</th>
+                                    <th>ExpectedDate</th>
+                                    <th>Modified</th>
+                                    <th>Created</th>
+                                    <th>Data</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td>{{requests.pk}}</td>
+                                    <td>{{requests.assigned_to}}</td>
+                                    <td>{{requests.requested_by}}</td>
+                                    <td>{{requests.synopsis_of_request}}</td>
+                                    <td>{{requests.status}}</td>
+                                    <td>{{requests.stakeholders}}</td>
+                                    <td>{{requests.env_swimlane}}</td>
+                                    <td>{{requests.application}}</td>
+                                    <td>{{requests.expected_date}}</td>
+                                    <td>{{requests.date_updated}}</td>
+                                    <td>{{requests.date_posted}}</td>
+                                    {% if requests.test_data %}
+                                    <td><a class="btn btn-info" href="{{requests.test_data.url}}" role="button">Download</td>
+                                    {% else %}
+                                    <td>None</td>
+                                    {% endif %}
+                                    <td><a class="btn btn-info" href="{% url 'update_requests' requests.id %}" role="button">Update</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
