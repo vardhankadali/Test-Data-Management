@@ -12,9 +12,6 @@
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-                <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
-            </div>
             <div class="info">
                 <a href="#" class="d-block">{{user}}</a>
             </div>
@@ -67,6 +64,30 @@
                         </p>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    {% url 'add_manager' as add_manager %}
+                    <a href="{{add_manager}}" class="nav-link {% if add_manager == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-user-plus"></i>
+                        <p>
+                            Add Manager
+
+                        </p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'manage_manager' as manage_manager %}
+                    {% url 'edit_manager' manager_id as edit_manager %}
+                    <a href="{{manage_manager}}"
+                        class="nav-link {% if manage_manager == request.path or request.path == edit_manager %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Manage Manager
+
+                        </p>
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     {% url 'add_requester' as add_requester %}
@@ -86,7 +107,7 @@
                         class="nav-link {% if manage_requester == request.path or request.path == edit_requester %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            Manage Requester
+                            Manage Requesters
 
                         </p>
                     </a>
@@ -96,7 +117,7 @@
                     <a href="{{add_supplier}}" class="nav-link  {% if add_supplier == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-user-plus"></i>
                         <p>
-                            Add Supplier
+                            Add TDM Team member
 
                         </p>
                     </a>
@@ -109,7 +130,7 @@
                         class="nav-link  {% if edit_supplier == request.path or manage_supplier == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            Manage Supplier
+                            Manage TDM Team members
 
                         </p>
                     </a>
@@ -127,9 +148,6 @@
                 <div class="sidebar">
                     <!-- Sidebar user panel (optional) -->
                     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                        <div class="image">
-                            <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
-                        </div>
                         <div class="info">
                             <a href="#" class="d-block">{{ user}}</a>
                         </div>
@@ -176,8 +194,8 @@
                             </li>            
                             
                             <li class="nav-item">
-                                {% url 'view_requests' as view_requests %}
-                                <a href="{{view_requests}}" class="nav-link {% if view_requests == request.path %} active {% endif %}">
+                                {% url 'view_requests_req' as view_requests_req %}
+                                <a href="{{view_requests_req}}" class="nav-link {% if view_requests_req == request.path %} active {% endif %}">
                                     <i class="nav-icon fas fa-th"></i>
                                     <p>
                                         My Requests
@@ -192,17 +210,13 @@
 
                                 <img src="{% static 'dist/img/AdminLTELogo.png' %} " alt="AdminLTE Logo"
                                     class="brand-image img-circle elevation-3" style="opacity: .8">
-                                <span class="brand-text font-weight-light">Supplier Panel</span>
+                                <span class="brand-text font-weight-light">TDM Team member Panel</span>
                             </a>
 
                             <!-- Sidebar -->
                             <div class="sidebar">
                                 <!-- Sidebar user panel (optional) -->
                                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                                    <div class="image">
-                                        <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2"
-                                            alt="User Image">
-                                    </div>
                                     <div class="info">
                                         <a href="#" class="d-block">{{user}}</a>
                                     </div>
@@ -238,15 +252,79 @@
                                         </li>
 
                                         <li class="nav-item">
-                                            {% url 'view_requests_all' as view_requests_all %}
-                                            <a href="{{view_requests_all}}" class="nav-link {% if view_requests_all == request.path %} active {% endif %}">
+                                            {% url 'view_requests_as' as view_requests_as %}
+                                            <a href="{{view_requests_as}}" class="nav-link {% if view_requests_as == request.path %} active {% endif %}">
                                                 <i class="nav-icon fas fa-th"></i>
                                                 <p>
-                                                    View Requests
+                                                    Requests Assigned
                         
                                                 </p>
                                             </a>
                                         </li>
+                                        {% elif request.user.user_type == '4' %}
+                                        <!-- Brand Logo -->
+                                        <a href="{% url 'manager_home' %}" class="brand-link">
+                                            <img src="{% static 'dist/img/cmsl.png' %} " alt="AdminLTE Logo"
+                                                class="brand-image img-circle elevation-3" >
+                                            <span class="brand-text font-weight-light">Manager Panel</span>
+                                        </a>
+                                    
+                                        <!-- Sidebar -->
+                                        <div class="sidebar">
+                                            <!-- Sidebar user panel (optional) -->
+                                            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                                                <div class="info">
+                                                    <a href="#" class="d-block">{{user}}</a>
+                                                </div>
+                                            </div>
+                                    
+                                            <!-- Sidebar Menu -->
+                                            <nav class="mt-2">
+                                                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                                    
+                                                    <li class="nav-item">
+                                                        {% url 'manager_home' as manager_home %}
+                                                        <a href="{{manager_home}}" class="nav-link {% if manager_home == request.path %} active {% endif %}">
+                                                            <i class="nav-icon fas fa-home"></i>
+                                                            <p>
+                                                                Home
+                                    
+                                                            </p>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        {% url 'manager_view_profile' as manager_view_profile %}
+                                                        <a href="{{manager_view_profile}}"
+                                                            class="nav-link {% if manager_view_profile == request.path %} active {% endif %}">
+                                                            <i class="nav-icon fas fa-address-card"></i>
+                                                            <p>
+                                                                Update Profile
+                                    
+                                                            </p>
+                                                        </a>
+                                                    </li>
+                                                    
+                                                    <li class="nav-item">
+                                                        {% url 'create_requests' as create_requests %}
+                                                        <a href="{{create_requests}}" class="nav-link {% if create_requests == request.path %} active {% endif %}">
+                                                            <i class="nav-icon fas fa-th"></i>
+                                                            <p>
+                                                                Raise Request
+                                    
+                                                            </p>
+                                                        </a>
+                                                    </li>
+                                    
+                                                    <li class="nav-item">
+                                                        {% url 'view_requests_all' as view_requests_all %}
+                                                        <a href="{{view_requests_all}}" class="nav-link {% if view_requests_all == request.path %} active {% endif %}">
+                                                            <i class="nav-icon fas fa-th"></i>
+                                                            <p>
+                                                                View Requests
+                                    
+                                                            </p>
+                                                        </a>
+                                                    </li>
                                         {% endif %}
 
 

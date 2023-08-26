@@ -2,11 +2,11 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import UserManager
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.urls import reverse
-
 
 
 
@@ -35,13 +35,12 @@ class CustomUserManager(UserManager):
 
 
 class CustomUser(AbstractUser):
-    USER_TYPE = ((1, "Admin"), (2, "Requester"), (3, "Supplier"))
+    USER_TYPE = ((1, "Admin"), (2, "Requester"), (3, "Supplier"), (4, "Manager"))
     GENDER = [("M", "Male"), ("F", "Female")]
     username = None
     email = models.EmailField(unique=True)
     user_type = models.CharField(default=1, choices=USER_TYPE, max_length=1)
     gender = models.CharField(max_length=1, choices=GENDER)
-    profile_pic = models.ImageField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = "email"
@@ -73,19 +72,28 @@ class Requester(models.Model):
         return self.admin.last_name + " " + self.admin.first_name
 
 
+class Manager(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.admin.last_name + " " + self.admin.first_name
+
+
 
 class Request(models.Model):
     STATUS = (('new', "New"), ('pending', "Pending"), ('closed', "Closed"))
-    ENV_SWIMLANE = ()
+    ENV_SWIMLANE = (('qa1', "QA1"), ('qa2', "QA2"))
     TYPE_OF_DATA_SETUP = (('new', "New"),('existing', "Existing"),('inforce', "Inforce"),('gold copy', "Gold Copy"),('not applicable', "Not Applicable"))
     TYPE_OF_REQUEST = (('normal', "Normal"), ('expediate', "Expediate"))
     STATE_JURISDICTION = ()
+    members = CustomUser.objects.filter(user_type=3)
+    ASSIGNED_TO = (members)
 
     status = models.CharField(default='new', choices=STATUS, max_length=100)
-    requested_by = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default="Unknown")
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     assigned_to = models.CharField(max_length=100, default="-----")
     type_of_request = models.CharField(default='normal', choices=TYPE_OF_REQUEST, max_length=100)
-    env_swimlane = models.CharField(max_length=100, default="-----")
+    env_swimlane = models.CharField(default='qa1', choices=ENV_SWIMLANE, max_length=100)
     project_name = models.CharField(max_length=100, default="-----")
     number_of_records = models.CharField(max_length=100, default="-----")
     application = models.CharField(max_length=100, default="-----")
@@ -112,6 +120,8 @@ def create_user_profile(sender, instance, created, **kwargs):
             Requester.objects.create(admin=instance)
         if instance.user_type == 3:
             Supplier.objects.create(admin=instance)
+        if instance.user_type == 4:
+            Manager.objects.create(admin=instance)
 
 
 
@@ -123,3 +133,5 @@ def save_user_profile(sender, instance, **kwargs):
         instance.requester.save()
     if instance.user_type == 3:
         instance.supplier.save()
+    if instance.user_type == 4:
+        instance.manager.save()

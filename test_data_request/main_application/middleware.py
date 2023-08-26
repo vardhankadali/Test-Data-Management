@@ -9,14 +9,17 @@ class LoginCheckMiddleWare(MiddlewareMixin):
         user = request.user
         if user.is_authenticated:
             if user.user_type == '1':
-                if modulename == 'main_application.supplier_views':
+                if modulename == 'main_application.supplier_views' or modulename == 'main_application.requester_views' or modulename == 'main_application.manager_views':
                     return redirect(reverse('admin_home'))
             elif user.user_type == '2':
-                if modulename == 'main_application.supplier_views' or modulename == 'main_application.admin_views':
+                if modulename == 'main_application.supplier_views' or modulename == 'main_application.admin_views' or modulename == 'main_application.manager_views':
                     return redirect(reverse('requester_home'))
             elif user.user_type == '3':
-                if modulename == 'main_application.admin_views' or modulename == 'main_application.requester_views':
+                if modulename == 'main_application.admin_views' or modulename == 'main_application.requester_views' or modulename == 'main_application.manager_views':
                     return redirect(reverse('supplier_home'))
+            elif user.user_type == '4':
+                if modulename == 'main_application.admin_views' or modulename == 'main_application.requester_views' or modulename == 'main_application.supplier_views':
+                    return redirect(reverse('manager_home'))
             else:
                 return redirect(reverse('login_page'))
         else:

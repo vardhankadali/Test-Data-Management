@@ -4,7 +4,25 @@
 {% block content %}
 <section class="content">
     <div class="container-fluid">
-      
+        <div class="row">
+
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{my_requests}}</h3>
+
+                        <p>My Requests</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-users"></i>
+                    </div>
+                    <a href="{% url 'view_requests_req' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            
+            <!-- ./col -->
+        </div>
     </div><!-- /.container-fluid -->
 </section>
 {% endblock content %}

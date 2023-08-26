@@ -4,38 +4,20 @@
 {% block content %}
 <section class="content">
     <div class="container-fluid">
-        <!-- Small boxes (Stat box) -->
         <div class="row">
 
             <div class="col-lg-3 col-6">
                 <!-- small box -->
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{total_managers}}</h3>
+                        <h3>{{total_requests}}</h3>
 
-                        <p>Managers</p>
+                        <p>All Requests</p>
                     </div>
                     <div class="icon">
                       <i class="nav-icon fas fa-users"></i>
                     </div>
-                    <a href="{% url 'manage_manager' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <!-- small box -->
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>{{total_suppliers}}</h3>
-
-                        <p>TDM Team members</p>
-                    </div>
-                    <div class="icon">
-                      <i class="nav-icon fas fa-users"></i>
-                    </div>
-                    <a href="{% url 'manage_supplier' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-
+                    <a href="{% url 'view_requests_all' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -43,14 +25,44 @@
                 <!-- small box -->
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{total_requester}}</h3>
+                        <h3>{{new_requests}}</h3>
 
-                        <p>Requesters</p>
+                        <p>New Requests</p>
                     </div>
                     <div class="icon">
                       <i class="nav-icon fas fa-users"></i>
                     </div>
-                    <a href="{% url 'manage_requester' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{% url 'view_requests_new' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{pending_requests}}</h3>
+
+                        <p>Pending Requests</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-users"></i>
+                    </div>
+                    <a href="{% url 'view_requests_pending' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{closed_requests}}</h3>
+
+                        <p>Closed Requests</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-users"></i>
+                    </div>
+                    <a href="{% url 'view_requests_closed' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->

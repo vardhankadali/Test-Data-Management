@@ -7,7 +7,6 @@ from .models import *
 class FormSettings(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormSettings, self).__init__(*args, **kwargs)
-        # Here make some changes such as:
         for field in self.visible_fields():
             field.field.widget.attrs['class'] = 'form-control'
 
@@ -21,7 +20,6 @@ class CustomUserForm(FormSettings):
     widget = {
         'password': forms.PasswordInput(),
     }
-    profile_pic = forms.ImageField()
 
     def __init__(self, *args, **kwargs):
         super(CustomUserForm, self).__init__(*args, **kwargs)
@@ -36,14 +34,14 @@ class CustomUserForm(FormSettings):
 
     def clean_email(self, *args, **kwargs):
         formEmail = self.cleaned_data['email'].lower()
-        if self.instance.pk is None:  # Insert
+        if self.instance.pk is None:
             if CustomUser.objects.filter(email=formEmail).exists():
                 raise forms.ValidationError(
                     "The given email is already registered")
-        else:  # Update
+        else:
             dbEmail = self.Meta.model.objects.get(
                 id=self.instance.pk).admin.email.lower()
-            if dbEmail != formEmail:  # There has been changes
+            if dbEmail != formEmail:
                 if CustomUser.objects.filter(email=formEmail).exists():
                     raise forms.ValidationError("The given email is already registered")
 
@@ -51,7 +49,7 @@ class CustomUserForm(FormSettings):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'gender',  'password','profile_pic']
+        fields = ['first_name', 'last_name', 'email', 'gender',  'password']
 
 
 class SupplierForm(CustomUserForm):
@@ -81,6 +79,15 @@ class RequesterForm(CustomUserForm):
         fields = CustomUserForm.Meta.fields
 
 
+class ManagerForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(ManagerForm, self).__init__(*args, **kwargs)
+
+    class Meta(CustomUserForm.Meta):
+        model = Manager
+        fields = CustomUserForm.Meta.fields
+
+
 class SupplierEditForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(SupplierEditForm, self).__init__(*args, **kwargs)
@@ -97,3 +104,35 @@ class RequesterEditForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Requester
         fields = CustomUserForm.Meta.fields
+
+
+class ManagerEditForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(ManagerEditForm, self).__init__(*args, **kwargs)
+
+    class Meta(CustomUserForm.Meta):
+        model = Manager
+        fields = CustomUserForm.Meta.fields
+
+
+class RaiseRequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RaiseRequestForm, self).__init__(*args, **kwargs)
+        self.fields['assigned_to'] = forms.ChoiceField(
+            choices=[(o.first_name + " " + o.last_name, o.first_name + " " + o.last_name) for o in CustomUser.objects.filter(user_type=3)]
+        )
+    class Meta():
+        model = Request
+        fields = ["status", "assigned_to", "type_of_request", "env_swimlane",
+               "project_name", "number_of_records", "application", "expected_date", "type_of_data_setup",
+               "stakeholders", "state_jurisdiction", "synopsis_of_request", "description_of_request"]
+
+class UpdateRequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(UpdateRequestForm, self).__init__(*args, **kwargs)
+        self.fields['assigned_to'] = forms.ChoiceField(
+            choices=[(o.first_name + " " + o.last_name, o.first_name + " " + o.last_name) for o in CustomUser.objects.filter(user_type=3)]
+        )
+    class Meta():
+        model = Request
+        fields = ["status", "assigned_to","test_data"]

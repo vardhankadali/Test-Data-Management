@@ -1,6 +1,6 @@
 {% extends 'main_application/base.html' %}
 {% load static %}
-{% block page_title %}View Requests{% endblock page_title %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
 
 {% block content %}
 
@@ -10,7 +10,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">View Requests</h3>
+                        <h3 class="card-title">{{page_title}}</h3>
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
@@ -28,12 +28,15 @@
                                     <th>ExpectedDate</th>
                                     <th>Modified</th>
                                     <th>Created</th>
+                                    <th>Data</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for request in requests %}
                                 <tr>
-                                    <td><a href="{% url 'detail_requests' request.id %}">{{request.pk}}</td>
+                                    <td>{{request.pk}}</td>
+                                    <!-- <td><a href="{% url 'detail_requests' request.id %}">{{request.pk}}</td> -->
                                     <td>{{request.assigned_to}}</td>
                                     <td>{{request.requested_by}}</td>
                                     <td>{{request.synopsis_of_request}}</td>
@@ -44,6 +47,12 @@
                                     <td>{{request.expected_date}}</td>
                                     <td>{{request.date_updated}}</td>
                                     <td>{{request.date_posted}}</td>
+                                    {% if request.test_data %}
+                                    <td><a class="btn btn-info" href="{{request.test_data.url}}" role="button">Download</td>
+                                    {% else %}
+                                    <td>None</td>
+                                    {% endif %}
+                                    <td><a class="btn btn-info" href="{% url 'update_requests' request.pk %}" role="button">Update</a></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

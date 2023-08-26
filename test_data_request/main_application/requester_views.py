@@ -12,9 +12,12 @@ from .models import *
 
 
 def requester_home(request):
-    # requester = get_object_or_404(Requester, admin=request.user)
+    my_requests = Request.objects.filter(requested_by = request.user).count()
+
     context = {
-        'page_title': 'Requester Panel',
+        'page_title': "Requester Dashboard",
+        'my_requests': my_requests
+
     }
     return render(request, 'requester_template/home_content.html', context)
 
@@ -30,15 +33,9 @@ def requester_view_profile(request):
                 last_name = form.cleaned_data.get('last_name')
                 password = form.cleaned_data.get('password') or None
                 gender = form.cleaned_data.get('gender')
-                passport = request.FILES.get('profile_pic') or None
                 admin = requester.admin
                 if password != None:
                     admin.set_password(password)
-                if passport != None:
-                    fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    admin.profile_pic = passport_url
                 admin.first_name = first_name
                 admin.last_name = last_name
                 admin.gender = gender

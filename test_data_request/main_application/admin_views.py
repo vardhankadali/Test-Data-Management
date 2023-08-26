@@ -17,6 +17,7 @@ from .models import *
 def admin_home(request):
     total_requester = Requester.objects.all().count()
     total_suppliers = Supplier.objects.all().count()
+    total_managers = Manager.objects.all().count()
     
     supplier_name_list=[]
 
@@ -28,6 +29,7 @@ def admin_home(request):
         'page_title': "Administrative Dashboard",
         'total_suppliers': total_suppliers,
         'total_requester': total_requester,
+        'total_managers': total_managers,
         "supplier_name_list": supplier_name_list,
 
     }
@@ -41,21 +43,13 @@ def add_requester(request):
         if form.is_valid():
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
-            address = form.cleaned_data.get('address')
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password')
-            course = form.cleaned_data.get('course')
-            passport = request.FILES.get('profile_pic')
-            fs = FileSystemStorage()
-            filename = fs.save(passport.name, passport)
-            passport_url = fs.url(filename)
             try:
                 user = CustomUser.objects.create_user(
-                    email=email, password=password, user_type=2, first_name=first_name, last_name=last_name, profile_pic=passport_url)
+                    email=email, password=password, user_type=2, first_name=first_name, last_name=last_name)
                 user.gender = gender
-                user.address = address
-                user.requester.course = course
                 user.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_requester'))
@@ -70,28 +64,19 @@ def add_requester(request):
 
 def add_supplier(request):
     supplier_form = SupplierForm(request.POST or None, request.FILES or None)
-    context = {'form': supplier_form, 'page_title': 'Add Supplier'}
+    context = {'form': supplier_form, 'page_title': 'Add TDM Team member'}
     if request.method == 'POST':
         if supplier_form.is_valid():
             first_name = supplier_form.cleaned_data.get('first_name')
             last_name = supplier_form.cleaned_data.get('last_name')
-            address = supplier_form.cleaned_data.get('address')
             email = supplier_form.cleaned_data.get('email')
             gender = supplier_form.cleaned_data.get('gender')
             password = supplier_form.cleaned_data.get('password')
-            course = supplier_form.cleaned_data.get('course')
-            session = supplier_form.cleaned_data.get('session')
-            passport = request.FILES['profile_pic']
-            fs = FileSystemStorage()
-            filename = fs.save(passport.name, passport)
-            passport_url = fs.url(filename)
             try:
                 user = CustomUser.objects.create_user(
-                    email=email, password=password, user_type=3, first_name=first_name, last_name=last_name, profile_pic=passport_url)
+                    email=email, password=password, user_type=3, first_name=first_name, last_name=last_name)
                 user.gender = gender
-                user.address = address
-                user.supplier.session = session
-                user.supplier.course = course
+
                 user.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_supplier'))
@@ -101,6 +86,30 @@ def add_supplier(request):
             messages.error(request, "Could Not Add: ")
     return render(request, 'admin_template/add_supplier_template.html', context)
 
+
+def add_manager(request):
+    manager_form = ManagerForm(request.POST or None, request.FILES or None)
+    context = {'form': manager_form, 'page_title': 'Add Manager'}
+    if request.method == 'POST':
+        if manager_form.is_valid():
+            first_name = manager_form.cleaned_data.get('first_name')
+            last_name = manager_form.cleaned_data.get('last_name')
+            email = manager_form.cleaned_data.get('email')
+            gender = manager_form.cleaned_data.get('gender')
+            password = manager_form.cleaned_data.get('password')
+            try:
+                user = CustomUser.objects.create_user(
+                    email=email, password=password, user_type=4, first_name=first_name, last_name=last_name)
+                user.gender = gender
+
+                user.save()
+                messages.success(request, "Successfully Added")
+                return redirect(reverse('add_manager'))
+            except Exception as e:
+                messages.error(request, "Could Not Add: " + str(e))
+        else:
+            messages.error(request, "Could Not Add: ")
+    return render(request, 'admin_template/add_manager_template.html', context)
 
 
 def manage_requester(request):
@@ -116,10 +125,18 @@ def manage_supplier(request):
     suppliers = CustomUser.objects.filter(user_type=3)
     context = {
         'suppliers': suppliers,
-        'page_title': 'Manage Suppliers'
+        'page_title': 'Manage TDM Team members'
     }
     return render(request, "admin_template/manage_supplier.html", context)
 
+
+def manage_manager(request):
+    managers = CustomUser.objects.filter(user_type=4)
+    context = {
+        'managers': managers,
+        'page_title': 'Manage Managers'
+    }
+    return render(request, "admin_template/manage_manager.html", context)
 
 
 def edit_requester(request, requester_id):
@@ -134,29 +151,19 @@ def edit_requester(request, requester_id):
         if form.is_valid():
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
-            address = form.cleaned_data.get('address')
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password') or None
-            course = form.cleaned_data.get('course')
-            passport = request.FILES.get('profile_pic') or None
             try:
                 user = CustomUser.objects.get(id=requester.admin.id)
                 user.username = username
                 user.email = email
                 if password != None:
                     user.set_password(password)
-                if passport != None:
-                    fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    user.profile_pic = passport_url
                 user.first_name = first_name
                 user.last_name = last_name
                 user.gender = gender
-                user.address = address
-                requester.course = course
                 user.save()
                 requester.save()
                 messages.success(request, "Successfully Updated")
@@ -177,37 +184,25 @@ def edit_supplier(request, supplier_id):
     context = {
         'form': form,
         'supplier_id': supplier_id,
-        'page_title': 'Edit Supplier'
+        'page_title': 'Edit TDM Team member'
     }
     if request.method == 'POST':
         if form.is_valid():
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
-            address = form.cleaned_data.get('address')
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password') or None
-            course = form.cleaned_data.get('course')
-            session = form.cleaned_data.get('session')
-            passport = request.FILES.get('profile_pic') or None
             try:
                 user = CustomUser.objects.get(id=supplier.admin.id)
-                if passport != None:
-                    fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    user.profile_pic = passport_url
                 user.username = username
                 user.email = email
                 if password != None:
                     user.set_password(password)
                 user.first_name = first_name
                 user.last_name = last_name
-                supplier.session = session
                 user.gender = gender
-                user.address = address
-                supplier.course = course
                 user.save()
                 supplier.save()
                 messages.success(request, "Successfully Updated")
@@ -219,6 +214,42 @@ def edit_supplier(request, supplier_id):
     else:
         return render(request, "admin_template/edit_supplier_template.html", context)
 
+
+def edit_manager(request, manager_id):
+    manager = get_object_or_404(Manager, id=manager_id)
+    form = ManagerForm(request.POST or None, instance=manager)
+    context = {
+        'form': form,
+        'manager_id': manager_id,
+        'page_title': 'Edit Manager'
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            gender = form.cleaned_data.get('gender')
+            password = form.cleaned_data.get('password') or None
+            try:
+                user = CustomUser.objects.get(id=manager.admin.id)
+                user.username = username
+                user.email = email
+                if password != None:
+                    user.set_password(password)
+                user.first_name = first_name
+                user.last_name = last_name
+                user.gender = gender
+                user.save()
+                manager.save()
+                messages.success(request, "Successfully Updated")
+                return redirect(reverse('edit_manager', args=[manager_id]))
+            except Exception as e:
+                messages.error(request, "Could Not Update " + str(e))
+        else:
+            messages.error(request, "Please Fill Form Properly!")
+    else:
+        return render(request, "admin_template/edit_manager_template.html", context)
 
 
 @csrf_exempt
@@ -246,15 +277,9 @@ def admin_view_profile(request):
                 first_name = form.cleaned_data.get('first_name')
                 last_name = form.cleaned_data.get('last_name')
                 password = form.cleaned_data.get('password') or None
-                passport = request.FILES.get('profile_pic') or None
                 custom_user = admin.admin
                 if password != None:
                     custom_user.set_password(password)
-                if passport != None:
-                    fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    custom_user.profile_pic = passport_url
                 custom_user.first_name = first_name
                 custom_user.last_name = last_name
                 custom_user.save()
@@ -282,5 +307,12 @@ def delete_requester(request, requester_id):
 def delete_supplier(request, supplier_id):
     supplier = get_object_or_404(CustomUser, supplier__id=supplier_id)
     supplier.delete()
-    messages.success(request, "Supplier deleted successfully!")
+    messages.success(request, "TDM Team member deleted successfully!")
     return redirect(reverse('manage_supplier'))
+
+
+def delete_manager(request, manager_id):
+    manager = get_object_or_404(CustomUser, manager__id=manager_id)
+    manager.delete()
+    messages.success(request, "Manager deleted successfully!")
+    return redirect(reverse('manage_manager'))

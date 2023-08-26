@@ -1,4 +1,5 @@
 import json
+from django.forms.models import BaseModelForm
 import requests
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -7,11 +8,12 @@ from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import UpdateView, ListView, DetailView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from bootstrap_datepicker_plus.widgets import DatePickerInput
 from .mail_backend import EmailBackend
 from .forms import *
 from .models import *
-# Create your views here.
+
 
 
 def login_page(request):
@@ -22,6 +24,8 @@ def login_page(request):
             return redirect(reverse("requester_home"))
         elif request.user.user_type == '3':
             return redirect(reverse("supplier_home"))
+        elif request.user.user_type == '4':
+            return redirect(reverse("manager_home"))
     return render(request, 'main_application/login.html')
 
 
@@ -57,6 +61,8 @@ def doLogin(request, **kwargs):
                 return redirect(reverse("requester_home"))
             elif user.user_type == '3':
                 return redirect(reverse("supplier_home"))
+            elif user.user_type == '4':
+                return redirect(reverse("manager_home"))
         else:
             messages.error(request, "Invalid details")
             return redirect("/")
@@ -68,7 +74,10 @@ class RequestListView(ListView):
     template_name = "main_application/view_requests.html"
     context_object_name = "requests"
     ordering = ['-date_posted']
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "View Requests"
+        return context
 
 
 class RequestListViewReq(ListView):
@@ -78,8 +87,60 @@ class RequestListViewReq(ListView):
     ordering = ['-date_posted']
     def get_queryset(self):
         return Request.objects.filter(requested_by=self.request.user)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "My Requests"
+        return context
 
 
+class RequestListViewAs(ListView):
+    model = Request
+    template_name = "main_application/view_requests.html"
+    context_object_name = "requests"
+    ordering = ['-date_posted']
+    def get_queryset(self):
+        o = self.request.user
+        return Request.objects.filter(assigned_to=o.first_name + " " + o.last_name)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Assigned Requests"
+        return context
+
+class RequestListViewNew(ListView):
+    model = Request
+    template_name = "main_application/view_requests.html"
+    context_object_name = "requests"
+    ordering = ['-date_posted']
+    def get_queryset(self):
+        return Request.objects.filter(status="new") 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "New Requests"
+        return context
+
+class RequestListViewPending(ListView):
+    model = Request
+    template_name = "main_application/view_requests.html"
+    context_object_name = "requests"
+    ordering = ['-date_posted']
+    def get_queryset(self):
+        return Request.objects.filter(status="pending") 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Pending Requests"
+        return context
+
+class RequestListViewClosed(ListView):
+    model = Request
+    template_name = "main_application/view_requests.html"
+    context_object_name = "requests"
+    ordering = ['-date_posted']
+    def get_queryset(self):
+        return Request.objects.filter(status="closed") 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Closed Requests"
+        return context
 
 class RequestDetailView(DetailView):
     model = Request
@@ -89,10 +150,11 @@ class RequestDetailView(DetailView):
 
 class RequestCreateView(LoginRequiredMixin, CreateView):
     model = Request
-    fields = ["status", "requested_by", "type_of_request", "env_swimlane",
-               "project_name", "number_of_records", "application", "expected_date", "type_of_data_setup",
-               "stakeholders", "state_jurisdiction", "synopsis_of_request", "description_of_request"]
+    form_class = RaiseRequestForm
     template_name = "main_application/create_requests.html"
+    def form_valid(self, form):
+        form.instance.requested_by = self.request.user
+        return super().form_valid(form)
     def get_form(self):
         form = super().get_form()
         form.fields["expected_date"].widget = DatePickerInput()
@@ -101,7 +163,7 @@ class RequestCreateView(LoginRequiredMixin, CreateView):
 
 class RequestUpdateView(LoginRequiredMixin, UpdateView):
     model = Request
-    fields = ["status","test_data"]
+    form_class = UpdateRequestForm
     template_name = "main_application/update_requests.html"
     context_object_name = "requests"
 
