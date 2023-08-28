@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import admin_views, requester_views, supplier_views, manager_views, views
 
@@ -24,10 +24,7 @@ urlpatterns = [
     path("manager/delete/<int:manager_id>",admin_views.delete_manager, name='delete_manager'),
     path("manager/edit/<int:manager_id>",admin_views.edit_manager, name='edit_manager'),
 
-    path("requests/all", views.RequestListView.as_view(), name='view_requests_all'),
-    path("requests/status/new", views.RequestListViewNew.as_view(), name='view_requests_new'),
-    path("requests/status/pending", views.RequestListViewPending.as_view(), name='view_requests_pending'),
-    path("requests/status/closed", views.RequestListViewClosed.as_view(), name='view_requests_closed'),
+    re_path(r"^requests/all$", views.RequestListView.as_view(), name='view_requests_all'),
     path("supplier/requests/", views.RequestListViewAs.as_view(), name='view_requests_as'),
     path("requester/requests/", views.RequestListViewReq.as_view(), name='view_requests_req'),
     path("requests/new/", views.RequestCreateView.as_view(), name='create_requests'),

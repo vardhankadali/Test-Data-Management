@@ -1,5 +1,8 @@
 {% extends 'main_application/base.html' %}
 {% load static %}
+{% load bootstrap %}
+
+
 {% block page_title %}{{page_title}}{% endblock page_title %}
 
 {% block content %}
@@ -14,6 +17,10 @@
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
+                        <form method="GET">
+                            {{filter.form}}
+                            <button type="submit" class="btn btn-info">Filter</button>
+                        </form>
                         <table id="example2" class="table table-bordered table-hover">
                             <thead class="thead-dark">
                                 <tr>
@@ -33,10 +40,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for request in requests %}
+                                {% for request in filter.qs %}
                                 <tr>
                                     <td>{{request.pk}}</td>
-                                    <!-- <td><a href="{% url 'detail_requests' request.id %}">{{request.pk}}</td> -->
                                     <td>{{request.assigned_to}}</td>
                                     <td>{{request.requested_by}}</td>
                                     <td>{{request.synopsis_of_request}}</td>

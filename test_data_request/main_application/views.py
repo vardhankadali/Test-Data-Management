@@ -1,4 +1,6 @@
 import json
+from typing import Any
+from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 import requests
 from django.contrib import messages
@@ -13,7 +15,7 @@ from bootstrap_datepicker_plus.widgets import DatePickerInput
 from .mail_backend import EmailBackend
 from .forms import *
 from .models import *
-
+from .filters import *
 
 
 def login_page(request):
@@ -73,10 +75,22 @@ class RequestListView(ListView):
     model = Request
     template_name = "main_application/view_requests.html"
     context_object_name = "requests"
-    ordering = ['-date_posted']
+    # ordering = ['-date_posted']
+
+    def get_queryset(self):
+        if 'new' in self.request.GET:
+            return Request.objects.filter(status="new").order_by('-date_posted')
+        elif 'pending' in self.request.GET:
+            return Request.objects.filter(status="pending").order_by('-date_posted')
+        elif 'closed' in self.request.GET:
+            return Request.objects.filter(status="closed").order_by('-date_posted')
+        else:
+            return Request.objects.all().order_by('-date_posted')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "View Requests"
+        context["filter"] = RequestFilter(self.request.GET, queryset=self.get_queryset())
         return context
 
 
@@ -84,9 +98,9 @@ class RequestListViewReq(ListView):
     model = Request
     template_name = "main_application/view_requests.html"
     context_object_name = "requests"
-    ordering = ['-date_posted']
+    # ordering = ['-date_posted']
     def get_queryset(self):
-        return Request.objects.filter(requested_by=self.request.user)
+        return Request.objects.filter(requested_by=self.request.user).order_by('-date_posted')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "My Requests"
@@ -97,55 +111,24 @@ class RequestListViewAs(ListView):
     model = Request
     template_name = "main_application/view_requests.html"
     context_object_name = "requests"
-    ordering = ['-date_posted']
+    # ordering = ['-date_posted']
     def get_queryset(self):
         o = self.request.user
-        return Request.objects.filter(assigned_to=o.first_name + " " + o.last_name)
+        return Request.objects.filter(assigned_to=o.first_name + " " + o.last_name).order_by('-date_posted')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Assigned Requests"
         return context
 
-class RequestListViewNew(ListView):
-    model = Request
-    template_name = "main_application/view_requests.html"
-    context_object_name = "requests"
-    ordering = ['-date_posted']
-    def get_queryset(self):
-        return Request.objects.filter(status="new") 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = "New Requests"
-        return context
-
-class RequestListViewPending(ListView):
-    model = Request
-    template_name = "main_application/view_requests.html"
-    context_object_name = "requests"
-    ordering = ['-date_posted']
-    def get_queryset(self):
-        return Request.objects.filter(status="pending") 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = "Pending Requests"
-        return context
-
-class RequestListViewClosed(ListView):
-    model = Request
-    template_name = "main_application/view_requests.html"
-    context_object_name = "requests"
-    ordering = ['-date_posted']
-    def get_queryset(self):
-        return Request.objects.filter(status="closed") 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = "Closed Requests"
-        return context
 
 class RequestDetailView(DetailView):
     model = Request
     template_name = "main_application/detail_view.html"
     context_object_name = "requests"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "View Request"
+        return context
 
 
 class RequestCreateView(LoginRequiredMixin, CreateView):
